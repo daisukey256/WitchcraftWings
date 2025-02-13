@@ -1,0 +1,34 @@
+WITCHCRAFT WINGS
+
+!== Creator ==!
+Daisuke Yoshida
+
+
+!== Assets and Licenses ==!
+
+AllSky Free - 10 Sky / Skybox Set
+ Standard Unity Asset Store EULA
+
+Legacy Particle Pack
+ Standard Unity Asset Store EULA
+
+Green Dungeon
+ Standard Unity Asset Store EULA
+
+Level 1 Monster Pack
+ Standard Unity Asset Store EULA
+
+Shooting Sound
+ Standard Unity Asset Store EULA
+
+8Bit Music - 062022
+ Standard Unity Asset Store EULA
+
+Post Processing
+ Unity Companion License
+
+Unity Toon Shader
+ Unity Companion License
+
+SD Kohaku chanz
+ Unity-chan Licens 3.0 

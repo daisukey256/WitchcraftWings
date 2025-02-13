@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
+using UnityEngine.SocialPlatforms.Impl;
 
 
 public enum YdGameState
@@ -13,16 +14,25 @@ public enum YdGameState
     GameEnd
 }
 
+
+
 public class YdGameManager : MonoBehaviour
 {
     // static変数
     public static YdGameState gameState;    // ゲームのステータスを管理するstatic変数
+
+    // 定数
+    const string HighScoreKey = "HIGH_SCORE";       // ハイスコアを記録するキー
+    const float blinkScoreTextInterval = 0.5f;      // ハイスコア更新時のスコア点滅間隔
+    const string ScoreTextLabel =   "Score : ";     // スコア表示のラベル
+    const string HiScoreTextLabel = "Hi-Score : ";  // ハイスコア表示のラベル
 
     // Inspectorに表示する変数
     public static YdGameManager instance;   // GameManager
     public int totalScore = 0;              // トータルスコア
 
     public TextMeshProUGUI statusText;      // ゲームステータステキスト
+    public TextMeshProUGUI highScoreText;   // ハイスコアテキスト
     public TextMeshProUGUI scoreText;       // スコアテキスト
     public GameObject uiPanel;              // UIパネル
     public GameObject pausePanel;           // 一時停止パネル
@@ -66,8 +76,11 @@ public class YdGameManager : MonoBehaviour
         // ゲームスタート待ち状態に設定
         gameState = YdGameState.WaitingToStart;
 
+        // ハイスコア表示
+        UpdateHiScoreText();
+
         // スコア初期表示
-        UpdateScore();
+        UpdateScoreText();
 
         // UIパネルを表示
         ActiveUIPanel();
@@ -102,6 +115,9 @@ public class YdGameManager : MonoBehaviour
             statusText.text = "GAME OVER";
             ActiveUIPanel();
 
+            // ハイスコア更新
+            UpdateHiScore();
+
             // GameOver BGM再生
             PlayLoopSound(gameoverSound);
             // BGMをフェードアウトしていく
@@ -122,6 +138,9 @@ public class YdGameManager : MonoBehaviour
             statusText.text = "GAME CLEAR";
             ActiveUIPanel();
 
+            // ハイスコア更新
+            UpdateHiScore();
+
             // 時間差でTitleシーンに移動(ChangeSceneメソッド)
             Invoke("ChangeToRetryScene", gameEndWaitTime);
 
@@ -132,9 +151,46 @@ public class YdGameManager : MonoBehaviour
     }
 
     // スコアを更新
-    void UpdateScore()
+    void UpdateScoreText()
     {
-        scoreText.text = "Score: " + totalScore;
+        scoreText.text = ScoreTextLabel + totalScore;
+    }
+
+    void UpdateHiScoreText()
+    {
+        int hiScore = PlayerPrefs.GetInt(HighScoreKey);
+        string hiScoreText = (hiScore > 0) ? HiScoreTextLabel + hiScore : "";
+        highScoreText.text = hiScoreText;
+    }
+
+    // ハイスコア更新
+    void UpdateHiScore()
+    {
+        // もしもPlayerPrefsに記録しておいたスコアより高いスコアだったらPlayerPrefs更新
+        if (PlayerPrefs.GetInt(HighScoreKey) < totalScore)
+        {
+            PlayerPrefs.SetInt(HighScoreKey, totalScore);
+
+            // スコアを点滅させる
+            StartCoroutine(BlinkScoreText());
+        }
+    }
+
+    // スコアを点滅させる
+    IEnumerator BlinkScoreText()
+    {
+        scoreText.color = Color.green;
+
+        while (true)
+        {
+            // テキストを非表示
+            scoreText.alpha = 0;
+            yield return new WaitForSeconds(blinkScoreTextInterval);
+
+            // テキストを表示
+            scoreText.alpha = 1;
+            yield return new WaitForSeconds(blinkScoreTextInterval);
+        }
     }
 
     // UIパネルを非表示にする
@@ -160,7 +216,7 @@ public class YdGameManager : MonoBehaviour
     public void AddScore(int scoreValue)
     {
         totalScore += scoreValue;
-        UpdateScore();
+        UpdateScoreText();
     }
 
     // BGMサウンドクリップをループ再生
@@ -336,5 +392,14 @@ public class YdGameManager : MonoBehaviour
         pausePanel.SetActive(false);
     }
 
+    // ハイスコアクリアボタンを押された時の処理
+    public void OnClearHiScoreButtonClicked()
+    {
+        // ハイスコア記録をゼロリセット
+        PlayerPrefs.SetInt(HighScoreKey, 0);
+
+        // ハイスコア表示を更新
+        UpdateHiScoreText();
+    }
 
 }
