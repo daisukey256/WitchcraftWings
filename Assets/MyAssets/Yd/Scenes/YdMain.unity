@@ -265,7 +265,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1578861089910890147, guid: fedb16c1a7ca58c4bb88ba4d47389018, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -48
       objectReference: {fileID: 0}
     - target: {fileID: 1578861089910890147, guid: fedb16c1a7ca58c4bb88ba4d47389018, type: 3}
       propertyPath: m_LocalRotation.w
@@ -874,11 +874,11 @@ MonoBehaviour:
   rotationAngle: 45
   rotationSpeed: 5
   sidewayMovemLimit: 5.5
-  sidewayMovementSpeed: 4
+  sidewayMovementSpeed: 4.5
   speedZ: 8
   accelerationZ: 5
   floatingHeight: 1
-  KnockbackForce: 10
+  KnockbackForce: 13
   KnockbackDuration: 0.8
   MuzzleTransform: {fileID: 2579820}
   BulletPrefab: {fileID: 26023842813701125, guid: 26efc6efaac231d4db6680546ee1582f, type: 3}
@@ -891,6 +891,8 @@ MonoBehaviour:
   damegeSE: {fileID: 8300000, guid: af66162561d2eed40ad49268cab318bb, type: 3}
   shotAudioSource: {fileID: 419262198}
   damegeAudioSource: {fileID: 419262199}
+  ShakeDuration: 0.6
+  ShakeMagnitude: 0.4
   life: 3
 --- !u!54 &419262196
 Rigidbody:
@@ -1381,10 +1383,11 @@ MonoBehaviour:
   - {fileID: 3008699844725646655, guid: fedb16c1a7ca58c4bb88ba4d47389018, type: 3}
   - {fileID: 8193759333392111954, guid: 1fe1ac7ed9a5c344c8bfcc34fcfb992a, type: 3}
   startChipIndex: 1
-  preInstantiate: 5
+  preInstantiate: 2
   generatedStageList:
   - {fileID: 1278030454}
   - {fileID: 1851465215}
+  charStartPosZOffset: 6
 --- !u!4 &560460425
 Transform:
   m_ObjectHideFlags: 0
@@ -4279,7 +4282,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5592949470646428366, guid: 1fe1ac7ed9a5c344c8bfcc34fcfb992a, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 48
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5592949470646428366, guid: 1fe1ac7ed9a5c344c8bfcc34fcfb992a, type: 3}
       propertyPath: m_LocalRotation.w

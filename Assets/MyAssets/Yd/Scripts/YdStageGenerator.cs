@@ -13,7 +13,7 @@ public class YdStageGenerator : MonoBehaviour
     public int startChipIndex;      // 自動生成開始インデックス
     public int preInstantiate;      //生成先読み個数（何個ステージを維持するか
     public List<GameObject> generatedStageList = new List<GameObject>();    //生成済みステージチップ保持リスト
-
+    public float charStartPosZOffset = 6f;  // ターゲットキャラクタ(Player)の初期位置がステージ端より少し先の場合のオフセット値
 
     // Start is called before the first frame update
     void Start()
@@ -29,7 +29,8 @@ public class YdStageGenerator : MonoBehaviour
     {
         // キャラクターの位置から現在のステージチップのインデックスを計算
         // PlayerのZ位置をステージのサイズで割るとPlayerの現在のIndexがわかる
-        int charaPositionIndex = (int)(character.position.z / StageChipSize);
+        float charPosZ = charStartPosZOffset + character.position.z;
+        int charaPositionIndex = (int)(charPosZ / StageChipSize);
 
         // 次のステージチップに入ったらステージの更新処理を行う
         //  Playerの現在のIndexにpreInstantiate(5個)足した数が、最先端のステージ番号を上回ってしまった場合

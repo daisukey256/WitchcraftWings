@@ -44,6 +44,10 @@ public class YdPlayerController : MonoBehaviour
     public AudioSource shotAudioSource;         // 射撃音用 
     public AudioSource damegeAudioSource;       // ダメージ音用
 
+    // [追加] ダメージを受けた際にカメラを揺らす
+    public float ShakeDuration = 0.5f;  // 揺れる時間
+    public float ShakeMagnitude = 0.4f;  // 揺れの強さ
+
 
     public int life = defaultLife;  // プレイヤーのライフ
 
@@ -72,8 +76,6 @@ public class YdPlayerController : MonoBehaviour
     Quaternion originalPlayerBodyRot;   // キャラクター本体の元の回転
 
     // [追加] ダメージを受けた際にカメラを揺らす
-    const float ShakeDuration = 0.5f;  // 揺れる時間
-    const float ShakeMagnitude = 0.4f;  // 揺れの強さ
     Transform cameraTransform;          // カメラ位置
     Vector3 originalCameraPos;          // カメラの元の位置
 

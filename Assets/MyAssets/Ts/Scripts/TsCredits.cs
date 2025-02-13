@@ -13,7 +13,7 @@ public class TsCredits : MonoBehaviour
         // クレジットテキストを設定
         creditsText.text = creditsTextFile.text;
         // 自身を非表示に設定
-        gameObject.SetActive(false);
+        //gameObject.SetActive(false);
     }
 
     // Start is called before the first frame update
