@@ -1,4 +1,4 @@
-using System.Linq; // Enumerable�Ŏg��
+using System.Linq; // Enumerableで使う
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -15,16 +15,11 @@ public class TsCarouselManager : MonoBehaviour
 
     [SerializeField] private TsCarouselView _carouselView;
     [SerializeField] private _bannaaerData[] _gameBannaaers;
-    //[SerializeField] private Button _setupButton;
-    //[SerializeField] private Button _cleanupButton;
 
     private bool _isSetup;
 
     private void Start()
     {
-        //_setupButton.onClick.AddListener(Setup);
-        //_cleanupButton.onClick.AddListener(Cleanup);
-
         Setup();
     }
 
@@ -55,7 +50,7 @@ public class TsCarouselManager : MonoBehaviour
         _isSetup = false;
     }
 
-    // �X�^�[�g�{�^���Ɋ��蓖�Ă郁�\�b�h
+    // スタートボタンに割り当てるメソッド
     public void OnStartButtonClicked(string sceneName)
     {
         Debug.Log("OnStartButtonClicked: " + sceneName);

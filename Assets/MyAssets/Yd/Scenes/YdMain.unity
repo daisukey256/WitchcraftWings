@@ -1218,8 +1218,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 32
-  m_fontSizeBase: 32
+  m_fontSize: 30
+  m_fontSizeBase: 30
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -2724,10 +2724,10 @@ RectTransform:
   - {fileID: 435538943}
   m_Father: {fileID: 306629197}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 178, y: -519.2013}
-  m_SizeDelta: {x: 246.159, y: 65.597}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 118, y: 42}
+  m_SizeDelta: {x: 220, y: 64}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &866738536
 MonoBehaviour:
@@ -3560,6 +3560,7 @@ MonoBehaviour:
   pausePanel: {fileID: 675702145}
   startButton: {fileID: 684565192}
   closeButton: {fileID: 2038722839}
+  clearHiScoreButton: {fileID: 866738534}
   player: {fileID: 419262195}
   lifePanel: {fileID: 922343513}
   gameEndWaitTime: 6

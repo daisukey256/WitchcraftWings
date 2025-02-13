@@ -1,10 +1,11 @@
-WITCHCRAFT WINGS
+<size=2em>WITCHCRAFT WINGS</size>
 
-!== Creator ==!
-Daisuke Yoshida
+<size=1.5em><B>Creator</B></size>
+<size=1.1em><B>
+   Daisuke Yoshida
+</B></size>
 
-
-!== Assets and Licenses ==!
+<size=1.5em><B>Assets and Licenses</B></size>
 
 AllSky Free - 10 Sky / Skybox Set
  Standard Unity Asset Store EULA
@@ -32,3 +33,7 @@ Unity Toon Shader
 
 SD Kohaku chanz
  Unity-chan Licens 3.0 
+
+UI button pack 2 - 1200 button
+ Standard Unity Asset Store EULA
+

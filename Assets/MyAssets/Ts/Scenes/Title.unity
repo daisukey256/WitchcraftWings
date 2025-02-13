@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 3
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 2100000, guid: 51b74d7bad397457d883c5940f7664d8, type: 2}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 7416536dbe0334cfd888dd1beb75a9fb, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -821,6 +821,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rotationSpeed: 0.5
+  morningSkybox: {fileID: 2100000, guid: 7416536dbe0334cfd888dd1beb75a9fb, type: 2}
+  afternoonSkybox: {fileID: 2100000, guid: 7416536dbe0334cfd888dd1beb75a9fb, type: 2}
+  sunsetSkybox: {fileID: 2100000, guid: 8b7dd0809c7c6498789fa32a61eaa6cb, type: 2}
+  duskSkybox: {fileID: 2100000, guid: b4f152e0498484391a9f0d5a1facf03b, type: 2}
+  nightSkybox: {fileID: 2100000, guid: c494c335823f54b52b2e87e1b7a63a23, type: 2}
+  morningStartHour: 6
+  afternoonStartHour: 12
+  sunsetStartHour: 17
+  duskStartHour: 18
+  nightStartHour: 19
+  checkIntervalSec: 1
 --- !u!1 &560968256
 GameObject:
   m_ObjectHideFlags: 0

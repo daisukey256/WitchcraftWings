@@ -38,6 +38,7 @@ public class YdGameManager : MonoBehaviour
     public GameObject pausePanel;           // 一時停止パネル
     public GameObject startButton;          // STARTボタン
     public GameObject closeButton;          // 一時停止ボタン
+    public GameObject clearHiScoreButton;   // Clear Hi-Scoreボタン
 
     public YdPlayerController player;       // プレイヤー
 
@@ -53,7 +54,7 @@ public class YdGameManager : MonoBehaviour
     // ロ＝カル変数
     AudioSource audioSource;                // BGM用オーディオソース
 
-    bool isPaused = false;                  // 一時停止フラグ
+    //bool isPaused = false;                  // 一時停止フラグ
 
     void Awake()
     {
@@ -150,17 +151,31 @@ public class YdGameManager : MonoBehaviour
 
     }
 
-    // スコアを更新
+    // スコア表示を更新
     void UpdateScoreText()
     {
         scoreText.text = ScoreTextLabel + totalScore;
     }
 
+    // ハイスコア表示を更新
     void UpdateHiScoreText()
     {
         int hiScore = PlayerPrefs.GetInt(HighScoreKey);
-        string hiScoreText = (hiScore > 0) ? HiScoreTextLabel + hiScore : "";
-        highScoreText.text = hiScoreText;
+        if (hiScore > 0) 
+        {
+            // ハイスコアが記録されていれば表示
+            highScoreText.text = HiScoreTextLabel + hiScore;
+
+            // ハイスコア消去ボタンを表示
+            clearHiScoreButton.SetActive(true);
+        }
+        else
+        {
+            // ハイスコアが表示されていない場合は表示しない
+            highScoreText.text = "";
+            // ハイスコア消去ボタンを非表示
+            clearHiScoreButton.SetActive(false);
+        }
     }
 
     // ハイスコア更新
@@ -293,7 +308,7 @@ public class YdGameManager : MonoBehaviour
     // ゲームの一時停止
     void PauseGame()
     {
-        isPaused = true;
+        //isPaused = true;
         // タイムスケールを0にすることで一時停止
         Time.timeScale = 0;
 
@@ -304,7 +319,7 @@ public class YdGameManager : MonoBehaviour
     // ゲームの一時停止を解除
     void ResumeGame()
     {
-        isPaused = false;
+        //isPaused = false;
         // タイムスケールを1にすることで一時停止解除
         Time.timeScale = 1.0f;
 
@@ -361,6 +376,9 @@ public class YdGameManager : MonoBehaviour
         // 一時停止ボタンを非表示
         closeButton.SetActive(false);
 
+        // UIパネルを非表示
+        uiPanel.SetActive(false);
+
         // 一時停止パネルを表示
         pausePanel.SetActive(true);
     }
@@ -387,6 +405,9 @@ public class YdGameManager : MonoBehaviour
 
         // 一時停止ボタンを表示
         closeButton.SetActive(true);
+
+        // UIパネルを表示
+        uiPanel.SetActive(true);
 
         // 一時停止パネルを非表示
         pausePanel.SetActive(false);
