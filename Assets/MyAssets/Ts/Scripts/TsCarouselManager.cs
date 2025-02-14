@@ -53,7 +53,7 @@ public class TsCarouselManager : MonoBehaviour
     // スタートボタンに割り当てるメソッド
     public void OnStartButtonClicked(string sceneName)
     {
-        Debug.Log("OnStartButtonClicked: " + sceneName);
+        //Debug.Log("OnStartButtonClicked: " + sceneName);
         SceneManager.LoadScene(sceneName);
     }
 

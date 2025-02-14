@@ -384,18 +384,28 @@ public class YdPlayerController : MonoBehaviour
     // ゲームクリア時処理
     IEnumerator GameClear()
     {
+        // 演出開始まで少し待って、機体の傾きを戻す
+        float waitTime = 1.0f;
+        float elapsedTime = 0f;
+        while (elapsedTime < waitTime)
+        {
+            cockpitTransform.rotation = 
+                Quaternion.Slerp(cockpitTransform.rotation, originalRotation, Time.deltaTime * rotationSpeed);
 
-        // 演出開始まで少し待つ
-        yield return new WaitForSeconds(1.0f);
+            elapsedTime += Time.deltaTime;
 
-        // フロントカメラに切り替え
-        cameraController.SwitchToFrontCamera();
+            // 次のフレームまで待つ
+            yield return null;
+        }
 
         // 射撃停止
         Shooting(false);
 
         // キャラクタの傾きをリセット
         ResetPlayerRotation();
+
+        // フロントカメラに切り替え
+        cameraController.SwitchToFrontCamera();
 
         // 箒に重力を付けて落とす
         Broom.AddComponent<Rigidbody>();
