@@ -507,6 +507,7 @@ GameObject:
   - component: {fileID: 278019837}
   - component: {fileID: 278019836}
   - component: {fileID: 278019835}
+  - component: {fileID: 278019838}
   m_Layer: 5
   m_Name: ShowCreditsButton
   m_TagString: Untagged
@@ -578,7 +579,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1039409000}
+      - m_Target: {fileID: 278019838}
         m_TargetAssemblyTypeName: TsCredits, Assembly-CSharp
         m_MethodName: OnShowCreditsButtonClicked
         m_Mode: 1
@@ -628,6 +629,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 278019833}
   m_CullTransparentMesh: 1
+--- !u!114 &278019838
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 278019833}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bf2728676650b148af4920af8cf01f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  creditsText: {fileID: 743329015}
+  creditsTextFile: {fileID: 4900000, guid: b7ab72cf9a7eb9f4ab852f18dd90dc51, type: 3}
+  creditPanel: {fileID: 1039408996}
+  creditButton: {fileID: 278019833}
 --- !u!1 &364028959
 GameObject:
   m_ObjectHideFlags: 0
@@ -664,7 +681,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -0.00019028943, y: 323.5915}
+  m_AnchoredPosition: {x: -0.00019028943, y: 323.58585}
   m_SizeDelta: {x: -511.64502, y: 27.82}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &364028961
@@ -914,8 +931,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2072264183}
   m_HandleRect: {fileID: 2072264182}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 1
+  m_Value: 1
+  m_Size: 0.99006057
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1393,7 +1410,6 @@ GameObject:
   - component: {fileID: 1039408997}
   - component: {fileID: 1039408999}
   - component: {fileID: 1039408998}
-  - component: {fileID: 1039409000}
   m_Layer: 5
   m_Name: CreditPanel
   m_TagString: Untagged
@@ -1461,20 +1477,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1039408996}
   m_CullTransparentMesh: 1
---- !u!114 &1039409000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1039408996}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7bf2728676650b148af4920af8cf01f1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  creditsText: {fileID: 743329015}
-  creditsTextFile: {fileID: 4900000, guid: b7ab72cf9a7eb9f4ab852f18dd90dc51, type: 3}
 --- !u!1 &1217086970
 GameObject:
   m_ObjectHideFlags: 0
@@ -1509,15 +1511,19 @@ MonoBehaviour:
   - sprite: {fileID: 21300000, guid: d05b7faeaf28d614e9bdf9d0e54a28b1, type: 3}
     gameTitle: 
     sceneName: YdMain
+    screenDirection: 0
   - sprite: {fileID: 21300000, guid: d05b7faeaf28d614e9bdf9d0e54a28b1, type: 3}
     gameTitle: 
     sceneName: YdMain
+    screenDirection: 0
   - sprite: {fileID: 21300000, guid: d05b7faeaf28d614e9bdf9d0e54a28b1, type: 3}
     gameTitle: 
     sceneName: YdMain
+    screenDirection: 0
   - sprite: {fileID: 21300000, guid: d05b7faeaf28d614e9bdf9d0e54a28b1, type: 3}
     gameTitle: 
     sceneName: YdMain
+    screenDirection: 0
 --- !u!4 &1217086972
 Transform:
   m_ObjectHideFlags: 0
@@ -1927,7 +1933,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1039409000}
+      - m_Target: {fileID: 278019838}
         m_TargetAssemblyTypeName: TsCredits, Assembly-CSharp
         m_MethodName: OnCloseButtonClicked
         m_Mode: 1
@@ -2173,8 +2179,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 319.99948, y: 369}
-  m_SizeDelta: {x: 640, y: 146.975}
+  m_AnchoredPosition: {x: 320, y: 369}
+  m_SizeDelta: {x: 640, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1699465525
 MonoBehaviour:
@@ -2502,7 +2508,7 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 779474633}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 0.009939432}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
