@@ -6,6 +6,7 @@ TagManager:
   tags:
   - YdEnemy
   - YdBullet
+  - YdBossGate
   layers:
   - Default
   - TransparentFX

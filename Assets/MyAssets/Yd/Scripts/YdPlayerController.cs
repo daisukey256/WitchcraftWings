@@ -9,6 +9,7 @@ public class YdPlayerController : MonoBehaviour
 
     // 暫定
     const float gameOverWaitTime = 5f;          // ゲームオーバー演出待ち時間
+    const float gameClearWaitTime = 10f;        // ゲームクリア演出待ち時間
 
     // Inspectorに表示する変数
     public float stunDuration = 0.2f;            // 気絶時間
@@ -48,6 +49,13 @@ public class YdPlayerController : MonoBehaviour
     public float ShakeDuration = 0.5f;  // 揺れる時間
     public float ShakeMagnitude = 0.4f;  // 揺れの強さ
 
+    // [追加] ボイス追加
+    public AudioSource voiceAudioSource;        // ボイス用
+    public AudioClip voiceDamage;               // ダメージ時ボイス
+    public AudioClip voiceOve;                  // ゲームオーバー時ボイス
+    public AudioClip voiceClear;                // ゲームクリア時ボイス
+    public AudioClip voiceFinish;               // フィニッシュ時ボイス
+
 
     public int life = defaultLife;  // プレイヤーのライフ
 
@@ -79,6 +87,9 @@ public class YdPlayerController : MonoBehaviour
     Transform cameraTransform;          // カメラ位置
     Vector3 originalCameraPos;          // カメラの元の位置
 
+    // [追加]ボス戦中
+    bool isBossBattle = false;      // ボス戦中かどうか
+    bool isPlayGameClear = false;   // ゲームクリア演出をプレイ中
 
     //コンポーネントの参照用
     CharacterController controller;
@@ -122,8 +133,21 @@ public class YdPlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // プレイ中でなければなにもしない
-        if (YdGameManager.gameState != YdGameState.Playing) return;
+        // TODO: ゲームクリア演出の呼び出しは要整理        
+        if (YdGameManager.gameState == YdGameState.GameClear)
+        {
+            if (isPlayGameClear) return;    // 2重呼び出しガード
+            isPlayGameClear = true;
+            // ゲームクリア処理を呼び出す
+            StartCoroutine(GameClear());
+
+            return;
+        }
+        else if (YdGameManager.gameState != YdGameState.Playing)
+        {
+            // プレイ中でなければなにもしない
+            return;
+        }
 
         // ノックバック中はなにもしない
         if (isKnockback) return;
@@ -137,7 +161,7 @@ public class YdPlayerController : MonoBehaviour
         // プレイ中にLifeが0になったらゲームオーバー
         if((life <= 0) && (YdGameManager.gameState == YdGameState.Playing))
         {
-            // ゲームステータスをゲームおーばーに
+            // ゲームステータスをゲームオーバーに
             YdGameManager.gameState = YdGameState.GameOver;
             // ゲームオーバー処理を呼び出す
             StartCoroutine(GameOver());
@@ -154,9 +178,12 @@ public class YdPlayerController : MonoBehaviour
         //  (2) moveDirectionを0からspeedZまでの値に制限した最終的な加速度に置き換え
         moveDirection.z = Mathf.Clamp(acceleratedZ, 0, speedZ);
 
-        Quaternion rot;
+        // ボス戦中は前進を止める
+        if (isBossBattle) moveDirection.z = 0;
 
-        // 横移動
+
+        // 横移動と傾斜
+        Quaternion rot;
         axisH = VirtualPad.Horizontal();
         // バーチャルパッドが使われていない場合は左右キーもチェック
         if (axisH == 0)
@@ -251,10 +278,7 @@ public class YdPlayerController : MonoBehaviour
         bulletRigidbody.AddForce(transform.forward * shotForce);
 
         // 発射サウンドを再生
-        if ((shotSE != null) && (shotAudioSource != null))
-        {
-            shotAudioSource.PlayOneShot(shotSE);
-        }
+        PlaySoundOneShot(shotAudioSource, shotSE);
 
     }
 
@@ -315,6 +339,7 @@ public class YdPlayerController : MonoBehaviour
         }
     }
 
+    // ノックバック状態から復帰する
     void RecoverFromKnockback()
     {
         //Debug.Log("RecoverFromKnockback");
@@ -355,11 +380,10 @@ public class YdPlayerController : MonoBehaviour
         // ライフ減
         life--;
 
+        // ダメージ時ボイス
+        PlaySoundOneShot(voiceAudioSource, voiceDamage);
         // ダメージサウンドを再生
-        if ((damegeSE != null) && (damegeAudioSource != null))
-        {
-            damegeAudioSource.PlayOneShot(damegeSE);
-        }
+        PlaySoundOneShot(damegeAudioSource, damegeSE);
     }
 
     // ゲームオーバー時処理
@@ -368,15 +392,43 @@ public class YdPlayerController : MonoBehaviour
         // 射撃停止
         Shooting(false);
 
+        // キャラクタの傾きをリセット
+        ResetPlayerRotation();
+
         // 箒に重力を付けて落とす
         Broom.AddComponent<Rigidbody>();
 
         // ゲームオーバーアニメーションを再生
         playerAnimator.SetBool("isOver", true);
 
+        // 負けボイス
+        PlaySoundOneShot(voiceAudioSource, voiceOve);
+
         // 指定した時間待機する
         yield return new WaitForSeconds(gameOverWaitTime);
      }
+
+    // ゲームクリア時処理
+    IEnumerator GameClear()
+    {
+        // 射撃停止
+        Shooting(false);
+
+        // キャラクタの傾きをリセット
+        ResetPlayerRotation();
+
+        // 箒に重力を付けて落とす
+        Broom.AddComponent<Rigidbody>();
+
+        // ゲームオーバーアニメーションを再生
+        playerAnimator.SetBool("isClear", true);
+
+        // 勝ちボイス
+        PlaySoundOneShot(voiceAudioSource, voiceClear);
+
+        // 指定した時間待機する
+        yield return new WaitForSeconds(gameOverWaitTime);
+    }
 
     // [追加] ダメージを受けた際にカメラを揺らす
     IEnumerator ShakeCamera(float shakeDuration, float shakeMagnitude)
@@ -410,6 +462,29 @@ public class YdPlayerController : MonoBehaviour
         cameraTransform.localPosition = originalCameraPos;
     }
 
+    void PlaySoundOneShot(AudioSource audioSource, AudioClip audioClip) 
+    {
+        // AudioSourceかAudioClipがnullならなにもしない
+        if ((audioSource == null) || (audioClip == null)) return;
+
+        audioSource.PlayOneShot(audioClip);
+    }
+
+
+    // [追加] ボス先を開始する
+    void StartBosssBattle()
+    {
+        if (isBossBattle) return;   // 二重呼び出し防止
+
+        isBossBattle = true;
+
+        // TODO: GameManagerと疎結合にする
+        YdGameManager.instance.StartBosssBattle();
+
+        // ボス戦ボイス
+        PlaySoundOneShot(voiceAudioSource, voiceFinish);
+    }
+
 
     // 衝突処理
     void OnCollisionEnter(Collision collision)
@@ -423,6 +498,17 @@ public class YdPlayerController : MonoBehaviour
         // 何にぶつかってもダメージを受ける
         ReceiveDamage();
 
+    }
+
+    // ゲート通過処理
+    void OnTriggerExit(Collider other)
+    {
+        // ボスゲートを通過した
+        if (other.tag == "YdBossGate")
+        {
+            // ちょっと進んでからボス戦に入る
+            Invoke("StartBosssBattle", 0.5f);
+        }
     }
 
 }

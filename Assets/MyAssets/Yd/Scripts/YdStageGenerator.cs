@@ -14,13 +14,14 @@ public class YdStageGenerator : MonoBehaviour
     public int preInstantiate;      //生成先読み個数（何個ステージを維持するか
     public List<GameObject> generatedStageList = new List<GameObject>();    //生成済みステージチップ保持リスト
     public float charStartPosZOffset = 6f;  // ターゲットキャラクタ(Player)の初期位置がステージ端より少し先の場合のオフセット値
+    public int bossStageIndex;      // ボスステージが配置されるインデックス
 
     // Start is called before the first frame update
     void Start()
     {
         // stargChipIndes(1)から1引いた数(0)が最先端のステージ番号
         currentChipIndex = startChipIndex - 1;
-        // まずはゲーム開始と同時にpreInstantiate(5個)分だけステージを生成する
+        // まずはゲーム開始と同時にpreInstantiate分だけステージを生成する
         UpdateStage(preInstantiate);
     }
 
@@ -33,7 +34,7 @@ public class YdStageGenerator : MonoBehaviour
         int charaPositionIndex = (int)(charPosZ / StageChipSize);
 
         // 次のステージチップに入ったらステージの更新処理を行う
-        //  Playerの現在のIndexにpreInstantiate(5個)足した数が、最先端のステージ番号を上回ってしまった場合
+        //  Playerの現在のIndexにpreInstantiate足した数が、最先端のステージ番号を上回ってしまった場合
         if (charaPositionIndex + preInstantiate > currentChipIndex)
         {
             UpdateStage(charaPositionIndex + preInstantiate);
@@ -55,7 +56,7 @@ public class YdStageGenerator : MonoBehaviour
             generatedStageList.Add(stageObject);
         }
 
-        // preInstantiate(5個) +2 =7個　をリストに記載されたステージ情報が上回ってしまったら
+        // preInstantiate + 2 個　をリストに記載されたステージ情報が上回ってしまったら
         // ステージ保有上限内になるまで古いステージを削除
         while (generatedStageList.Count > preInstantiate + 2) DestroyOldestStage();
 
@@ -65,9 +66,16 @@ public class YdStageGenerator : MonoBehaviour
     // 指定のインデックス位置にStageオブジェクトをランダムに生成
     GameObject GenerateStage(int chipIndex)
     {
-        int nextStageChip = Random.Range(0, stageChips.Length);
-
         // stageChips配列からランダムな番号のステージを選択
+        // stageChips配列の最後はボスステージなので0から最後の１つ手前までから選択
+        int nextStageChip = Random.Range(0, (stageChips.Length - 1));
+
+        // 現在生成されているの先端ステージがボスステージの一個手前ならば、次はボスステージを生成
+        if (currentChipIndex == bossStageIndex - 1)
+        {
+            nextStageChip = stageChips.Length - 1;
+        }
+
         // 引数にあたえられたステージ番号*サイズのz位置にあたらしく生成
         // 特に回転はしない
         GameObject stageObject = Instantiate(

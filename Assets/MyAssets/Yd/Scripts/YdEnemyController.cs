@@ -5,9 +5,11 @@ using UnityEngine;
 public class YdEnemyController : MonoBehaviour
 {
     public int scoreValue;          // 倒した時の得点
+    public int life = 1;            // ライフ
     public float moveSpeed = 1.0f;  // 動く速さ
     public float moveWidth = 0.3f;  // 動きの幅
     public float maxDelay = 2f;     // 横移動開始をずらす最大時間
+    public bool isBoss = false;     // ボスフラグ
 
     public Animator animator;   // 敵を動かすアニメータ
 
@@ -58,11 +60,19 @@ public class YdEnemyController : MonoBehaviour
         // 弾に当たった
         if(other.tag == "YdBullet")
         {
-            // スコアを加算
-            YdGameManager.instance.AddScore(scoreValue);
+            life--;
+            if(life < 0)
+            {
+                // スコアを加算
+                YdGameManager.instance.AddScore(scoreValue);
 
-            // 自分自身を削除
-            Destroy(gameObject);
+                // ボスだったらゲームクリア
+                if (isBoss) YdGameManager.gameState = YdGameState.GameClear;
+
+                // 自分自身を削除
+                Destroy(gameObject);
+
+            }
         }
     }
 
