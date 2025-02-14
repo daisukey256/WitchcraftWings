@@ -66,7 +66,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7992726498627286838, guid: 079f09ae00444204584cd9a912f999cd, type: 3}
       propertyPath: life
-      value: 20
+      value: 40
       objectReference: {fileID: 0}
     - target: {fileID: 7992726498627286838, guid: 079f09ae00444204584cd9a912f999cd, type: 3}
       propertyPath: isBoss

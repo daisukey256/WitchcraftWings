@@ -44,6 +44,7 @@ public class YdGameManager : MonoBehaviour
     public GameObject startButton;          // STARTボタン
     public GameObject closeButton;          // 一時停止ボタン
     public GameObject clearHiScoreButton;   // Clear Hi-Scoreボタン
+    public GameObject operationGuidPanel;   // 操作ガイドパネル
 
     public YdPlayerController player;       // プレイヤー
 
@@ -99,6 +100,9 @@ public class YdGameManager : MonoBehaviour
         // UIパネルを表示
         ActiveUIPanel();
 
+        // 操作ガイドを表示
+        operationGuidPanel.SetActive(true);
+
         // 一時停止ボタンとパネルを非表示
         closeButton.SetActive(false);
         pausePanel.SetActive(false);
@@ -138,6 +142,9 @@ public class YdGameManager : MonoBehaviour
             // 二重呼び出し防止
             isStateProcessing = true;
 
+            // GameOverになってから入った得点の表示も反映
+            UpdateScoreText();
+
             // ゲームオーバー処理
             GameOver();
         }
@@ -146,6 +153,9 @@ public class YdGameManager : MonoBehaviour
         {
             // 二重呼び出し防止
             isStateProcessing = true;
+
+            // ボスクリアの得点も表示に反映
+            UpdateScoreText();
 
             // ゲームクリア処理
             GameClear();
@@ -457,6 +467,9 @@ public class YdGameManager : MonoBehaviour
 
         // スタートボタンを非表示に
         if (startButton != null) startButton.SetActive(false);
+
+        // 操作ガイドを非表示
+        operationGuidPanel.SetActive(false);
 
         // 一時停止ボタンを表示
         closeButton.SetActive(true);

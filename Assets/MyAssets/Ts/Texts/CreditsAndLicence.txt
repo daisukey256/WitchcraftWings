@@ -34,6 +34,12 @@ Unity Toon Shader
 SD Kohaku chanz
  Unity-chan Licens 3.0 
 
+TheCogen-CityAllStars_Unity-chan_VoicePack_ActionGames_Vol.1
+ Unity-chan Licens 3.0
+
+Google Fonts
+ SIL Open Font License
+
 UI button pack 2 - 1200 button
  Standard Unity Asset Store EULA
 
