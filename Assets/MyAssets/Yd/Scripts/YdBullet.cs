@@ -1,22 +1,39 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class YdBullet : MonoBehaviour
 {
-    public float destroyAfterTime = 5.0f;   // 弾の生存期間
 
-    public GameObject explosionEffect;  // 爆発エフェクト
-    public float effectDuration = 1.0f; // エフェクトを削除するまでの時間    
+    // ------------------------------------
+    // 外部から参照される Publicフィールド変数  
+    // ------------------------------------
+    public Transform ExplosionsParentTransform; // 爆発エフェクトを子に配置するオブジェクト
 
-    public AudioClip explosionSE;       // 爆発音
+    // ------------------------------------
+    // Inspectorに表示するフィールド変数
+    //  TODO: 外部から参照されないが、Inspectorに表示するためにpublicにしている変数は
+    //  授業では出てこなかった　[SerializeField] private に変える
+    // ------------------------------------
+    public float destroyDelayTime = 1.0f;       // 弾の生存期間
 
+    public GameObject explosionEffectPrefab;    // 爆発エフェクトプレファブ
+    public float effectDuration = 1.0f;         // エフェクトを削除するまでの時間    
+
+    public AudioClip explosionSE;               // 爆発音
+
+
+    // ------------------------------------
+    // Privateフィールド変数
+    // ------------------------------------
     bool hasCollided = false;           // 衝突フラグ
 
     // コンポーネント参照用
-    AudioSource audioSource; 
+    AudioSource audioSource;
 
+
+    // ------------------------------------
     // Start is called before the first frame update
+    // ------------------------------------
     void Start()
     {
         // オーディオソースを取得しておく
@@ -26,21 +43,19 @@ public class YdBullet : MonoBehaviour
         StartCoroutine(DestroyAfterTime());
     }
 
-    // Update is called once per frame
-    void Update()
-    {
 
-    }
-
+    // ------------------------------------
     // 一定時間経過後に弾を消滅させる
+    // ------------------------------------
     IEnumerator DestroyAfterTime()
     {
-        yield return new WaitForSeconds(destroyAfterTime);
+        yield return new WaitForSeconds(destroyDelayTime);
         // なにかに衝突していなければ消滅
         if (!hasCollided) { 
             Destroy(gameObject); 
         }
     }
+
 
     // なにかと衝突した場合
     private void OnTriggerEnter(Collider other)
@@ -62,11 +77,18 @@ public class YdBullet : MonoBehaviour
         }
     }
 
+
     // 爆発処理のコルーチン
     IEnumerator playExplosion()
     {
         // エフェクトを現在のオブジェクトの位置と回転で生成
-        GameObject effectInstance = Instantiate(explosionEffect, transform.position, transform.rotation);
+        GameObject effectInstance = Instantiate(explosionEffectPrefab, transform.position, transform.rotation);
+
+        // Hierarchy上でちらばらないように指定のオブジェクトの子として配置
+        if (ExplosionsParentTransform != null)
+        {
+            effectInstance.transform.parent = ExplosionsParentTransform;
+        }
 
         // 爆発サウンドを再生
         if ((explosionSE != null) && (audioSource != null))
@@ -74,11 +96,10 @@ public class YdBullet : MonoBehaviour
             audioSource.PlayOneShot(explosionSE);
         }
 
-        // 一定時間後にエフェクトと弾を削除
+        // 一定時間後にエフェクトを削除
         yield return new WaitForSeconds(effectDuration);
         Destroy(effectInstance);
         Destroy(gameObject);
     }
-
 
 }

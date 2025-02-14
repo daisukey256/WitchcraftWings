@@ -1,22 +1,33 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class YdStageGenerator : MonoBehaviour
 {
-    const int StageChipSize = 48;   // 1ステージチップのサイズ
-
-    int currentChipIndex;           // 今何番目にいるのか
-
+    // ------------------------------------
+    // Inspectorに表示するフィールド変数
+    //  TODO: 外部から参照されないが、Inspectorに表示するためにpublicにしている変数は
+    //  授業では出てこなかった　[SerializeField] private に変える
+    // ------------------------------------
     public Transform character;     // ターゲットキャラクタ(Player)
+    public int stageChipSize = 48;  // 1ステージチップのサイズ
     public GameObject[] stageChips; // ステージチッププレファブ配列（ランダムに生成したいステージの素）
+    public List<GameObject> generatedStageList = new List<GameObject>();    //生成済みステージチップ保持リスト
+    public Transform stageParentTransform;  // ステージを子として格納するオブジェクト
     public int startChipIndex;      // 自動生成開始インデックス
     public int preInstantiate;      //生成先読み個数（何個ステージを維持するか
-    public List<GameObject> generatedStageList = new List<GameObject>();    //生成済みステージチップ保持リスト
     public float charStartPosZOffset = 6f;  // ターゲットキャラクタ(Player)の初期位置がステージ端より少し先の場合のオフセット値
     public int bossStageIndex;      // ボスステージが配置されるインデックス
 
+
+    // ------------------------------------
+    // Privateフィールド変数
+    // ------------------------------------
+    int currentChipIndex;           // 今何番目にいるのか
+
+
+    // ------------------------------------
     // Start is called before the first frame update
+    // ------------------------------------
     void Start()
     {
         // stargChipIndes(1)から1引いた数(0)が最先端のステージ番号
@@ -25,13 +36,16 @@ public class YdStageGenerator : MonoBehaviour
         UpdateStage(preInstantiate);
     }
 
+
+    // ------------------------------------
     // Update is called once per frame
+    // ------------------------------------
     void Update()
     {
         // キャラクターの位置から現在のステージチップのインデックスを計算
         // PlayerのZ位置をステージのサイズで割るとPlayerの現在のIndexがわかる
         float charPosZ = charStartPosZOffset + character.position.z;
-        int charaPositionIndex = (int)(charPosZ / StageChipSize);
+        int charaPositionIndex = (int)(charPosZ / stageChipSize);
 
         // 次のステージチップに入ったらステージの更新処理を行う
         //  Playerの現在のIndexにpreInstantiate足した数が、最先端のステージ番号を上回ってしまった場合
@@ -41,7 +55,10 @@ public class YdStageGenerator : MonoBehaviour
         }
     }
 
+
+    // ------------------------------------
     // 指定のIndexまでのステージチップを生成して、管理下に置く
+    // ------------------------------------
     void UpdateStage(int toChipIndex)
     {
         // もし引数で指定された番号が最先端のステージ番号以下であれば何かの間違いなのでなにもしない
@@ -54,6 +71,12 @@ public class YdStageGenerator : MonoBehaviour
 
             // 生成したステージチップを管理リストに追加
             generatedStageList.Add(stageObject);
+
+            // Hierarchy上でちらばらないように指定のオブジェクトの子として配置
+            if (stageParentTransform != null)
+            {
+                stageObject.transform.parent = stageParentTransform;
+            }
         }
 
         // preInstantiate + 2 個　をリストに記載されたステージ情報が上回ってしまったら
@@ -63,7 +86,10 @@ public class YdStageGenerator : MonoBehaviour
         currentChipIndex = toChipIndex;
     }
 
+
+    // ------------------------------------
     // 指定のインデックス位置にStageオブジェクトをランダムに生成
+    // ------------------------------------
     GameObject GenerateStage(int chipIndex)
     {
         // stageChips配列からランダムな番号のステージを選択
@@ -80,14 +106,17 @@ public class YdStageGenerator : MonoBehaviour
         // 特に回転はしない
         GameObject stageObject = Instantiate(
             stageChips[nextStageChip],
-            new Vector3(0, 0, chipIndex * StageChipSize),
+            new Vector3(0, 0, chipIndex * stageChipSize),
             Quaternion.identity
         );
 
         return stageObject;
     }
 
+
+    // ------------------------------------
     // 一番古いステージを削除
+    // ------------------------------------
     void DestroyOldestStage()
     {
         GameObject oldStage = generatedStageList[0];

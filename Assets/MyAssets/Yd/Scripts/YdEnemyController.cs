@@ -1,21 +1,29 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class YdEnemyController : MonoBehaviour
 {
+    // ------------------------------------
+    // Inspectorに表示するフィールド変数
+    //  TODO: 外部から参照されないが、Inspectorに表示するためにpublicにしている変数は
+    //  授業では出てこなかった　[SerializeField] private に変える
+    // ------------------------------------
     public int scoreValue;          // 倒した時の得点
     public int life = 1;            // ライフ
+    public bool isBoss = false;     // ボスフラグ
     public float moveSpeed = 1.0f;  // 動く速さ
     public float moveWidth = 0.3f;  // 動きの幅
-    public float maxDelay = 2f;     // 横移動開始をずらす最大時間
-    public bool isBoss = false;     // ボスフラグ
+    public Animator animator;       // 敵を動かすアニメータ
 
-    public Animator animator;   // 敵を動かすアニメータ
-
+    // ------------------------------------
+    // Privateフィールド変数
+    // ------------------------------------
     float initialPosX;  // 初期位置X座標
 
+
+    // ------------------------------------
     // Start is called before the first frame update
+    // ------------------------------------
     void Start()
     {
         // 敵を左右に動かす
@@ -25,11 +33,10 @@ public class YdEnemyController : MonoBehaviour
         animator.Play(animator.GetCurrentAnimatorStateInfo(0).shortNameHash, 0, Random.Range(0f, 1f));
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-    }
 
+    // ------------------------------------
+    // 敵を左右に動かすコルーチン
+    // ------------------------------------
     IEnumerator MoveEnemiesPeriodically()
     {
         // 現在の位置を記録
@@ -37,9 +44,6 @@ public class YdEnemyController : MonoBehaviour
 
         // ランダムな位相シフトを生成
         float phaseShift = Random.Range(0f, 2f * Mathf.PI);
-        //// ランダムな遅延時間を生成
-        //float delay = Random.Range(0f, maxDelay);
-        //yield return new WaitForSeconds(delay);  // 遅延時間を待つ
 
         while (true)
         {
@@ -52,7 +56,9 @@ public class YdEnemyController : MonoBehaviour
     }
 
 
+    // ------------------------------------
     // 衝突・被弾処理
+    // ------------------------------------
     private void OnTriggerEnter(Collider other)
     {
         //Debug.Log("OnTriggerEnter");
@@ -60,14 +66,15 @@ public class YdEnemyController : MonoBehaviour
         // 弾に当たった
         if(other.tag == "YdBullet")
         {
+            // 敵のライフを減らす
             life--;
             if(life < 0)
             {
                 // スコアを加算
-                YdGameManager.instance.AddScore(scoreValue);
+                YdGameManager.TotalScore += scoreValue;
 
                 // ボスだったらゲームクリア
-                if (isBoss) YdGameManager.gameState = YdGameState.GameClear;
+                if (isBoss) YdGameManager.GameState = YdGameState.GameClear;
 
                 // 自分自身を削除
                 Destroy(gameObject);

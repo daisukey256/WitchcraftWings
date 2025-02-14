@@ -146,4 +146,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b28b5cc16de73614c8f9ce119b527092, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  destroyAfterTime: 1
+  ExplosionsParentTransform: {fileID: 0}
+  destroyDelayTime: 1
+  explosionEffectPrefab: {fileID: 4152751292203688657, guid: 6b833ae10f30dcf49b0f023af1dd0fe3, type: 3}
+  effectDuration: 1
+  explosionSE: {fileID: 8300000, guid: 5e1a9f876d3dafd47bc6b3dde25135fa, type: 3}

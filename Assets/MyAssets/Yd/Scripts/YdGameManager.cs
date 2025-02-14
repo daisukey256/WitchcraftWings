@@ -2,9 +2,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
-using UnityEngine.SocialPlatforms.Impl;
 
 
+// ゲームステータス
 public enum YdGameState
 {
     WaitingToStart,
@@ -15,22 +15,27 @@ public enum YdGameState
 }
 
 
-
 public class YdGameManager : MonoBehaviour
 {
-    // static変数
-    public static YdGameState gameState;    // ゲームのステータスを管理するstatic変数
-
+    // ------------------------------------
     // 定数
-    const string HighScoreKey = "HIGH_SCORE";       // ハイスコアを記録するキー
-    const float blinkScoreTextInterval = 0.5f;      // ハイスコア更新時のスコア点滅間隔
-    const string ScoreTextLabel = "Score : ";     // スコア表示のラベル
-    const string HiScoreTextLabel = "Hi-Score : ";  // ハイスコア表示のラベル
+    // ------------------------------------
+    const string SCORE_TEXT_LABEL = "Score : ";      // スコア表示のラベル
+    const string HI_SCORE_TEXT_LABEL = "Hi-Score : ";   // ハイスコア表示のラベル
+    const string HI_SCORE_KEY = "HIGH_SCORE";    // ハイスコアを記録するキー
 
-    // Inspectorに表示する変数
-    public static YdGameManager instance;   // GameManager
-    public int totalScore = 0;              // トータルスコア
+    // ------------------------------------
+    // 外部から参照される Publicフィールド変数  
+    // ------------------------------------
+    public static YdGameState GameState;            // ゲームのステータスを管理するstatic変数
+    public static bool IsBossEncountered = false;   // ボスにエンカウントした
+    public static int TotalScore = 0;               // トータルスコア
 
+    // ------------------------------------
+    // Inspectorに表示するフィールド変数
+    //  TODO: 外部から参照されないが、Inspectorに表示するためにpublicにしている変数は
+    //  授業では出てこなかった　[SerializeField] private に変える
+    // ------------------------------------
     public TextMeshProUGUI statusText;      // ゲームステータステキスト
     public TextMeshProUGUI highScoreText;   // ハイスコアテキスト
     public TextMeshProUGUI scoreText;       // スコアテキスト
@@ -44,7 +49,6 @@ public class YdGameManager : MonoBehaviour
 
     public YdLifePanel lifePanel;           // LifeのUI更新用
 
-    public float gameEndWaitTime = 3.0f;    // Title画面へ戻るまでの時間
     public string retrySceneName;           // リトライシーン名
 
     public float bgmVolume = 0.5f;          // BGMサウンドボリューム
@@ -53,33 +57,38 @@ public class YdGameManager : MonoBehaviour
     public AudioClip bossBosssBattleSound;  // ボス戦サウンドクリップ
     public AudioClip gemeClearSound;        // GAME CLEARサウンドクリップ 
 
-    public AudioClip voiceBye;              // お別れボイス
+    public float blinkScoreTextInterval = 0.5f;      // ハイスコア更新時のスコア点滅間隔
 
-    // ロ＝カル変数
+    public float bgmFadeOutTime = 3.0f;      // Title画面へ戻るまでの時間
+    public float bossBgmFadeOutTime = 1.5f;  // ボス戦BGMに切り替わるときのフェードアウト時間
+    public float bossBgmFadeInTime  = 0.5f;  // ボス戦BGMに切り替わるときのフェードイン時間
+
+    public float returnToTitleDelayTime = 1.5f; // タイトルへ戻るまでの待ち時間
+
+    // ------------------------------------
+    // Privateフィールド変数
+    // ------------------------------------
     AudioSource audioSource;                // BGM用オーディオソース
+    bool isStateProcessing = false;         // ステート変化時の処理中フラグ
+    bool isGameEndProcessing = false;       // GameEnd処理中フラグ
 
-    //bool isPaused = false;                  // 一時停止フラグ
 
-    void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else if (instance != this)
-        {
-            // 既にinstanceがあるのに生成されてしまった場合は破棄
-            Destroy(gameObject);
-        }
-    }
-
+    // ------------------------------------
     // Start is called before the first frame update
+    // ------------------------------------
     void Start()
     {
         audioSource = GetComponent<AudioSource>();
 
         // ゲームスタート待ち状態に設定
-        gameState = YdGameState.WaitingToStart;
+        GameState = YdGameState.WaitingToStart;
+        // ボスエンカウントフラグも初期化
+        IsBossEncountered = false;
+        // スコア初期化
+        TotalScore = 0;
+        // ステート変化時の処理中フラグ初期化
+        isStateProcessing = false;
+        isGameEndProcessing = false;
 
         // ハイスコア表示
         UpdateHiScoreText();
@@ -89,7 +98,6 @@ public class YdGameManager : MonoBehaviour
 
         // UIパネルを表示
         ActiveUIPanel();
-
 
         // 一時停止ボタンとパネルを非表示
         closeButton.SetActive(false);
@@ -101,79 +109,78 @@ public class YdGameManager : MonoBehaviour
         StartCoroutine(FadeInLoopSound(1.0f));
     }
 
+
+    // ------------------------------------
     // Update is called once per frame
+    // ------------------------------------
     void Update()
     {
-        //もしステータスが"gameend"なら何もしない
-        if (gameState == YdGameState.GameEnd) return;
-
-        //常にLifeパネルを更新
-        UpdateLifePanel();
-
-        // ステータスが"gameover"なら
-        if (gameState == YdGameState.GameOver)
+        // プレイ中
+        if (GameState == YdGameState.Playing)
         {
-            // ステータスを"gameend”にする
-            gameState = YdGameState.GameEnd;
+            //常にLifeパネルとスコアを更新
+            UpdateLifePanel();
+            UpdateScoreText();
 
-            // mainTextを"GAME OVER"にして表示
-            statusText.text = "GAME OVER";
-            ActiveUIPanel();
+            // ボスにエンカウントしていたらボス戦開始
+            if (IsBossEncountered)
+            {
+                // 二重呼び出し防止
+                IsBossEncountered = false;
 
-            // ハイスコア更新
-            UpdateHiScore();
-
-            // GameOver BGM再生
-            PlayLoopSound(gameoverSound);
-            // BGMをフェードアウトしていく
-            StartCoroutine(FadeOutLoopSound(gameEndWaitTime));
-
-            // 時間差でTitleシーンに移動(ChangeSceneメソッド)
-            Invoke("ChangeToRetryScene", gameEndWaitTime);
-
-            // 以降の処理は行わない
-            return;
+                // ボス戦開始
+                StartCoroutine(StartBosssBattle());
+            }
         }
-        else if (gameState == YdGameState.GameClear)
+        // ゲームオーバー
+        else if ((GameState == YdGameState.GameOver) && !isStateProcessing)
         {
-            // ステータスを"gameend”にする
-            gameState = YdGameState.GameEnd;
+            // 二重呼び出し防止
+            isStateProcessing = true;
 
-            // mainTextを"GAME CLEAR"にして表示
-            statusText.text = "GAME CLEAR";
-            ActiveUIPanel();
-
-            // ハイスコア更新
-            UpdateHiScore();
-
-            // GameClear BGM再生
-            PlayLoopSound(gemeClearSound);
-            // BGMをフェードアウトしていく
-            StartCoroutine(FadeOutLoopSound(gameEndWaitTime));
-
-            // 時間差でTitleシーンに移動(ChangeSceneメソッド)
-            Invoke("ChangeToRetryScene", gameEndWaitTime);
-
-            // 以降の処理は行わない
-            return;
+            // ゲームオーバー処理
+            GameOver();
         }
+        // ゲームクリア
+        else if ((GameState == YdGameState.GameClear) && !isStateProcessing)
+        {
+            // 二重呼び出し防止
+            isStateProcessing = true;
 
+            // ゲームクリア処理
+            GameClear();
+        }
+        // ゲーム終了
+        else if ((GameState == YdGameState.GameEnd) && !isGameEndProcessing)
+        {
+            // 二重呼び出し防止
+            isGameEndProcessing = true;
+
+            // ゲームエンド処理
+            GameEnd();
+        }
     }
 
+
+    // ------------------------------------
     // スコア表示を更新
+    // ------------------------------------
     void UpdateScoreText()
     {
-        scoreText.text = ScoreTextLabel + totalScore;
+        scoreText.text = SCORE_TEXT_LABEL + TotalScore;
     }
 
+
+    // ------------------------------------
     // ハイスコア表示を更新
+    // ------------------------------------
     void UpdateHiScoreText()
     {
-        int hiScore = PlayerPrefs.GetInt(HighScoreKey);
+        int hiScore = PlayerPrefs.GetInt(HI_SCORE_KEY);
         if (hiScore > 0)
         {
             // ハイスコアが記録されていれば表示
-            highScoreText.text = HiScoreTextLabel + hiScore;
+            highScoreText.text = HI_SCORE_TEXT_LABEL + hiScore;
 
             // ハイスコア消去ボタンを表示
             clearHiScoreButton.SetActive(true);
@@ -187,20 +194,26 @@ public class YdGameManager : MonoBehaviour
         }
     }
 
+
+    // ------------------------------------
     // ハイスコア更新
+    // ------------------------------------
     void UpdateHiScore()
     {
         // もしもPlayerPrefsに記録しておいたスコアより高いスコアだったらPlayerPrefs更新
-        if (PlayerPrefs.GetInt(HighScoreKey) < totalScore)
+        if (PlayerPrefs.GetInt(HI_SCORE_KEY) < TotalScore)
         {
-            PlayerPrefs.SetInt(HighScoreKey, totalScore);
+            PlayerPrefs.SetInt(HI_SCORE_KEY, TotalScore);
 
             // スコアを点滅させる
             StartCoroutine(BlinkScoreText());
         }
     }
 
+
+    // ------------------------------------
     // スコアを点滅させる
+    // ------------------------------------
     IEnumerator BlinkScoreText()
     {
         scoreText.color = Color.green;
@@ -217,33 +230,87 @@ public class YdGameManager : MonoBehaviour
         }
     }
 
+
+    // ------------------------------------
+    // ゲームオーバー処理
+    // ------------------------------------
+    void GameOver()
+    {
+        // mainTextを"GAME OVER"にして表示
+        statusText.text = "GAME OVER";
+        ActiveUIPanel();
+
+        // ハイスコア更新
+        UpdateHiScore();
+
+        // GameOver BGM再生
+        PlayLoopSound(gameoverSound);
+
+        // BGMをフェードアウトしていく
+        StartCoroutine(FadeOutLoopSound(bgmFadeOutTime));
+    }
+
+
+    // ------------------------------------
+    // ゲームクリア処理
+    // ------------------------------------
+    void GameClear()
+    {
+        // mainTextを"GAME CLEAR"にして表示
+        statusText.text = "GAME CLEAR";
+        ActiveUIPanel();
+
+        // ハイスコア更新
+        UpdateHiScore();
+
+        // GameClear BGM再生
+        PlayLoopSound(gemeClearSound);
+
+        // BGMをフェードアウトしていく
+        StartCoroutine(FadeOutLoopSound(bgmFadeOutTime));
+    }
+
+
+    // ------------------------------------
+    // ゲームエンド処理
+    // ------------------------------------
+    void GameEnd()
+    {
+        // Titleシーンに移動(ChangeSceneメソッド)
+        ChangeToRetryScene();
+    }
+
+
+    // ------------------------------------
     // UIパネルを非表示にする
+    // ------------------------------------
     void InactiveUIPanel()
     {
         uiPanel.SetActive(false);
     }
 
+
+    // ------------------------------------
     // UIパネルを表示する
+    // ------------------------------------
     void ActiveUIPanel()
     {
         uiPanel.SetActive(true);
     }
 
+
+    // ------------------------------------
     // Lifeパネルの内容を更新
+    // ------------------------------------
     void UpdateLifePanel()
     {
-        lifePanel.UpdateLife(player.life);
+        lifePanel.UpdateLife(player.Life);
     }
 
 
-    // スコアを追加
-    public void AddScore(int scoreValue)
-    {
-        totalScore += scoreValue;
-        UpdateScoreText();
-    }
-
+    // ------------------------------------
     // BGMサウンドクリップをループ再生
+    // ------------------------------------
     void PlayLoopSound(AudioClip soundClip)
     {
         if ((soundClip != null) && (audioSource != null))
@@ -261,7 +328,10 @@ public class YdGameManager : MonoBehaviour
         }
     }
 
-    // 
+
+    // ------------------------------------
+    // 効果音を再生する
+    // ------------------------------------
     void PlayOneshot(AudioClip soundClip)
     {
         if ((soundClip == null) || (audioSource == null)) return;
@@ -270,13 +340,18 @@ public class YdGameManager : MonoBehaviour
     }
 
 
+    // ------------------------------------
     //  BGMサウンドを停止
+    // ------------------------------------
     void StopLoopSound()
     {
         audioSource.Stop();
     }
 
+
+    // ------------------------------------
     //  BGMサウンドを一時停止
+    // ------------------------------------
     void PauseLoopSound(bool isPaused)
     {
         if (isPaused)
@@ -291,7 +366,10 @@ public class YdGameManager : MonoBehaviour
         }
     }
 
+
+    // ------------------------------------
     // BMGをフェードイン
+    // ------------------------------------
     public IEnumerator FadeInLoopSound(float duration)
     {
         audioSource.volume = 0;
@@ -308,7 +386,10 @@ public class YdGameManager : MonoBehaviour
         audioSource.volume = bgmVolume;
     }
 
+
+    // ------------------------------------
     // BMGをフェードアウト
+    // ------------------------------------
     IEnumerator FadeOutLoopSound(float duration)
     {
         float startVolume = audioSource.volume;
@@ -321,12 +402,14 @@ public class YdGameManager : MonoBehaviour
 
         audioSource.volume = 0;
         audioSource.Stop();
-    }    
+    }
 
+
+    // ------------------------------------
     // ゲームの一時停止
+    // ------------------------------------
     void PauseGame()
     {
-        //isPaused = true;
         // タイムスケールを0にすることで一時停止
         Time.timeScale = 0;
 
@@ -334,10 +417,12 @@ public class YdGameManager : MonoBehaviour
         PauseLoopSound(true);
     }
 
+
+    // ------------------------------------
     // ゲームの一時停止を解除
+    // ------------------------------------
     void ResumeGame()
     {
-        //isPaused = false;
         // タイムスケールを1にすることで一時停止解除
         Time.timeScale = 1.0f;
 
@@ -346,7 +431,9 @@ public class YdGameManager : MonoBehaviour
     }
 
 
+    // ------------------------------------
     // リトライシーンに切り替え
+    // ------------------------------------
     void ChangeToRetryScene()
     {
         // BGM停止
@@ -356,11 +443,14 @@ public class YdGameManager : MonoBehaviour
         SceneManager.LoadScene(retrySceneName);
     }
 
+
+    // ------------------------------------
     // スタートボタンが押された時の処理
+    // ------------------------------------
     public void OnStartButtonClicked()
     {
         // ゲーム中状態に設定
-        gameState = YdGameState.Playing;
+        GameState = YdGameState.Playing;
 
         // mainTextを"GAME START"表示に
         statusText.text = "GAME START";
@@ -371,6 +461,9 @@ public class YdGameManager : MonoBehaviour
         // 一時停止ボタンを表示
         closeButton.SetActive(true);
 
+        // ハイスコア消去ボタンはスタート画面でしか使わないので非表示にしておく
+        clearHiScoreButton.SetActive(false);
+
         // UIパネルを消す
         Invoke("InactiveUIPanel", 1.0f);
 
@@ -378,27 +471,35 @@ public class YdGameManager : MonoBehaviour
         player.AttackStart();
     }
 
+
+    // ------------------------------------
     // 戻るボタンが押された時の処理
+    // ------------------------------------
     public void OnReturnToTitleButtonClicked()
     {
         StartCoroutine(ReturnToTitleWithWait());
     }
 
+
+    // ------------------------------------
+    // 少しまってからタイトルへ戻る
+    // ------------------------------------
     IEnumerator ReturnToTitleWithWait()
     {
         // お別れボイス再生
-        PlayOneshot(voiceBye);
-        // BGMをフェードアウトしていく
-        StartCoroutine(FadeOutLoopSound(1f));
-        // AudioSourceの再生が終わるまで待機
-        yield return new WaitForSeconds(1.0f);
+        player.PlayVoiceBye();
+
+        // BGMをフェードアウトしてAudioSourceの再生が終わるまで待機
+        yield return StartCoroutine(FadeOutLoopSound(returnToTitleDelayTime));
 
         // タイトルシーンに切り替え
         SceneManager.LoadScene("Title");
     }
 
 
+    // ------------------------------------
     // ポーズボタンが押された時の処理
+    // ------------------------------------
     public void OnPauseButtonClicked()
     {
         // ゲームを一時停止
@@ -414,7 +515,10 @@ public class YdGameManager : MonoBehaviour
         pausePanel.SetActive(true);
     }
 
+
+    // ------------------------------------
     // リスタートボタンが押された時の処理
+    // ------------------------------------
     public void OnRestartButtonClicked()
     {
         // ゲームを再開　
@@ -428,7 +532,10 @@ public class YdGameManager : MonoBehaviour
         ChangeToRetryScene();
     }
 
+
+    // ------------------------------------
     // コンティニューボタンが押された時の処理
+    // ------------------------------------
     public void OnContinueButtonClicked()
     {
         // ゲームの一時停止を解除
@@ -437,32 +544,35 @@ public class YdGameManager : MonoBehaviour
         // 一時停止ボタンを表示
         closeButton.SetActive(true);
 
-        // UIパネルを表示
-        uiPanel.SetActive(true);
-
         // 一時停止パネルを非表示
         pausePanel.SetActive(false);
     }
 
+
+    // ------------------------------------
     // ハイスコアクリアボタンを押された時の処理
+    // ------------------------------------
     public void OnClearHiScoreButtonClicked()
     {
         // ハイスコア記録をゼロリセット
-        PlayerPrefs.SetInt(HighScoreKey, 0);
+        PlayerPrefs.SetInt(HI_SCORE_KEY, 0);
 
         // ハイスコア表示を更新
         UpdateHiScoreText();
     }
 
+
+    // ------------------------------------
     // [追加] ボス戦開始
-    public void StartBosssBattle()
+    // ------------------------------------
+    private IEnumerator StartBosssBattle()
     {
-        //// BGMをフェードアウトしていく
-        //StartCoroutine(FadeOutLoopSound(1f));
+        // BGMをフェードアウトしていく
+        yield return StartCoroutine(FadeOutLoopSound(bossBgmFadeOutTime));
         // BGM切り替え
         PlayLoopSound(bossBosssBattleSound);
-        //// BGMをフェードインしていく
-        //StartCoroutine(FadeInLoopSound(1f));
+        // BGMをフェードインしていく
+        yield return StartCoroutine(FadeInLoopSound(bossBgmFadeInTime));
     }
 
 }

@@ -425,8 +425,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scoreValue: 10
   life: 1
+  isBoss: 0
   moveSpeed: 1
-  moveWidth: 0.3
+  moveWidth: 0.5
   maxDelay: 2
   animator: {fileID: 6724904634526875743}
 --- !u!65 &8781266783203408961
