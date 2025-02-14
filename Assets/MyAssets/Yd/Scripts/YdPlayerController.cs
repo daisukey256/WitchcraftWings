@@ -1,5 +1,8 @@
 using System.Collections;
+using Unity.VisualScripting;
+using UnityChan;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class YdPlayerController : MonoBehaviour
 {
@@ -12,8 +15,6 @@ public class YdPlayerController : MonoBehaviour
     const float gameClearWaitTime = 10f;        // ゲームクリア演出待ち時間
 
     // Inspectorに表示する変数
-    public float stunDuration = 0.2f;            // 気絶時間
-
     public float rotationAngle = 45.0f;         // プレイヤーの傾斜角度
     public float rotationSpeed = 5.0f;          // プレイヤーの傾斜速度
 
@@ -45,9 +46,7 @@ public class YdPlayerController : MonoBehaviour
     public AudioSource shotAudioSource;         // 射撃音用 
     public AudioSource damegeAudioSource;       // ダメージ音用
 
-    // [追加] ダメージを受けた際にカメラを揺らす
-    public float ShakeDuration = 0.5f;  // 揺れる時間
-    public float ShakeMagnitude = 0.4f;  // 揺れの強さ
+    public YdCameraController cameraController; // カメラコントローラ
 
     // [追加] ボイス追加
     public AudioSource voiceAudioSource;        // ボイス用
@@ -60,7 +59,6 @@ public class YdPlayerController : MonoBehaviour
     public int life = defaultLife;  // プレイヤーのライフ
 
     // ダメージに関する変数
-    float recoverTime = 0.0f;   // 気絶状態からの復帰時間
     bool isKnockback = false;   // ノックバック中かどうか
 
     // プレイヤーの操作に関する変数
@@ -83,13 +81,10 @@ public class YdPlayerController : MonoBehaviour
     Vector3 originalPlayerBodyPos;      // キャラクター本体の元の位置
     Quaternion originalPlayerBodyRot;   // キャラクター本体の元の回転
 
-    // [追加] ダメージを受けた際にカメラを揺らす
-    Transform cameraTransform;          // カメラ位置
-    Vector3 originalCameraPos;          // カメラの元の位置
-
     // [追加]ボス戦中
     bool isBossBattle = false;      // ボス戦中かどうか
     bool isPlayGameClear = false;   // ゲームクリア演出をプレイ中
+    bool isHovering = false;        // 前進を止めて空中で止まる
 
     //コンポーネントの参照用
     CharacterController controller;
@@ -111,10 +106,6 @@ public class YdPlayerController : MonoBehaviour
         {
             Debug.LogError("Cockpit Not Found");
         }
-
-        // [追加] ダメージを受けた際にカメラを揺らす
-        // メインカメラのTransformを取得して保存
-        cameraTransform = Camera.main.transform;
 
         // プレイヤー内部の回転パーツの回転位置と傾斜角度を準備
         originalRotation = cockpitTransform.rotation;
@@ -153,8 +144,6 @@ public class YdPlayerController : MonoBehaviour
         if (isKnockback) return;
 
 
-        // 気絶状態かチェック
-
         // プレイヤーを移動
         MovePlayer();
 
@@ -179,7 +168,7 @@ public class YdPlayerController : MonoBehaviour
         moveDirection.z = Mathf.Clamp(acceleratedZ, 0, speedZ);
 
         // ボス戦中は前進を止める
-        if (isBossBattle) moveDirection.z = 0;
+        if (isHovering) moveDirection.z = 0;
 
 
         // 横移動と傾斜
@@ -283,26 +272,12 @@ public class YdPlayerController : MonoBehaviour
     }
 
 
-    // 気絶しているかどうかの判定
-    bool IsStun()
-    {
-        // 復帰迄の時間が0より上なら
-        // まだ気絶中→true
-        // あるいはLifeが0→true ※うごけない
-        return recoverTime > 0.0f || life <= 0;
-    }
-
     public void AttackStart()
     {
         // 射撃開始
         Shooting(true);
     }
 
-    // 気絶する
-    void Stun() {
-        recoverTime = stunDuration;
-
-    }
 
     // キャラクターの回転をリセット
     void ResetPlayerRotation()
@@ -369,10 +344,8 @@ public class YdPlayerController : MonoBehaviour
         Shooting(false);
 
         // [追加] ダメージを受けた際にカメラを揺らす
-        StartCoroutine(ShakeCamera(ShakeDuration, ShakeMagnitude));
-
-        // 気絶
-        Stun();
+        cameraController.ShakeCamera();
+        //StartCoroutine(ShakeCamera(ShakeDuration, ShakeMagnitude));
 
         // 跳ね返る
         Knockback();
@@ -411,6 +384,13 @@ public class YdPlayerController : MonoBehaviour
     // ゲームクリア時処理
     IEnumerator GameClear()
     {
+
+        // 演出開始まで少し待つ
+        yield return new WaitForSeconds(1.0f);
+
+        // フロントカメラに切り替え
+        cameraController.SwitchToFrontCamera();
+
         // 射撃停止
         Shooting(false);
 
@@ -430,37 +410,6 @@ public class YdPlayerController : MonoBehaviour
         yield return new WaitForSeconds(gameOverWaitTime);
     }
 
-    // [追加] ダメージを受けた際にカメラを揺らす
-    IEnumerator ShakeCamera(float shakeDuration, float shakeMagnitude)
-    {
-        float elapsed = 0.0f;   // 経過時間
-
-        // 現在のカメラ位置を取得
-        originalCameraPos = cameraTransform.localPosition;
-
-        // 指定時間カメラをランダムに揺らす
-        while (elapsed < shakeDuration)
-        {
-            // カメラの揺れ幅をランダムに決める
-            float dx = Random.Range(-1f, 1f) * shakeMagnitude;
-            float dy = Random.Range(-1f, 1f) * shakeMagnitude;
-
-            // カメラの位置を設定
-            cameraTransform.localPosition = new Vector3(
-                    originalCameraPos.x + dx,
-                    originalCameraPos.y + dy,
-                    originalCameraPos.z
-            );
-
-            // 経過時間を加算 
-            elapsed += Time.deltaTime;
-
-            yield return null;
-        }
-
-        // カメラ位置を元に戻す
-        cameraTransform.localPosition = originalCameraPos;
-    }
 
     void PlaySoundOneShot(AudioSource audioSource, AudioClip audioClip) 
     {
@@ -468,21 +417,6 @@ public class YdPlayerController : MonoBehaviour
         if ((audioSource == null) || (audioClip == null)) return;
 
         audioSource.PlayOneShot(audioClip);
-    }
-
-
-    // [追加] ボス先を開始する
-    void StartBosssBattle()
-    {
-        if (isBossBattle) return;   // 二重呼び出し防止
-
-        isBossBattle = true;
-
-        // TODO: GameManagerと疎結合にする
-        YdGameManager.instance.StartBosssBattle();
-
-        // ボス戦ボイス
-        PlaySoundOneShot(voiceAudioSource, voiceFinish);
     }
 
 
@@ -507,8 +441,28 @@ public class YdPlayerController : MonoBehaviour
         if (other.tag == "YdBossGate")
         {
             // ちょっと進んでからボス戦に入る
-            Invoke("StartBosssBattle", 0.5f);
+            StartCoroutine(StartBosssBattle(0.5f));
         }
+    }
+
+    // [追加] ボス先を開始する
+    IEnumerator StartBosssBattle(float waitSeconds)
+    {
+        if (isBossBattle) yield break;   // 二重呼び出し防止
+        isBossBattle = true;
+
+        // 指定時間待ってから前進を止めてホバリング
+        yield return new WaitForSeconds(waitSeconds);
+        isHovering = true;
+
+        // GameManagerにボス戦開始を通知
+        // TODO: GameManagerと疎結合にする
+        YdGameManager.instance.StartBosssBattle();
+
+
+        // すこし待ってボス戦ボイスを再生
+        yield return new WaitForSeconds(1.0f);
+        PlaySoundOneShot(voiceAudioSource, voiceFinish);
     }
 
 }
