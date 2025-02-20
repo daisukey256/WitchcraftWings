@@ -1748,19 +1748,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _carouselView: {fileID: 36973179}
   _gameBannaaers:
-  - sprite: {fileID: 21300000, guid: d05b7faeaf28d614e9bdf9d0e54a28b1, type: 3}
+  - sprite: {fileID: 21300000, guid: 3ba2f1aa41fa8f343ae65b556f6b4d41, type: 3}
     gameTitle: 
     sceneName: YdMain
     screenDirection: 0
-  - sprite: {fileID: 21300000, guid: d05b7faeaf28d614e9bdf9d0e54a28b1, type: 3}
+  - sprite: {fileID: 21300000, guid: d5198a713f8bee34db0a0ff4f3756e3a, type: 3}
     gameTitle: 
     sceneName: YdMain
     screenDirection: 0
-  - sprite: {fileID: 21300000, guid: d05b7faeaf28d614e9bdf9d0e54a28b1, type: 3}
+  - sprite: {fileID: 21300000, guid: 7aa461799961a0940be430ae9b251b04, type: 3}
     gameTitle: 
     sceneName: YdMain
     screenDirection: 0
-  - sprite: {fileID: 21300000, guid: d05b7faeaf28d614e9bdf9d0e54a28b1, type: 3}
+  - sprite: {fileID: 21300000, guid: c87b96afda214eb45bdf172e7d1803cb, type: 3}
     gameTitle: 
     sceneName: YdMain
     screenDirection: 0

@@ -1,45 +1,71 @@
 <size=2em>WITCHCRAFT WINGS</size>
 
 <size=1.5em><B>Creator</B></size>
-<size=1.1em><B>
-   Daisuke Yoshida
-</B></size>
+<size=1.1em><B> Daisuke Yoshida</B></size>
+  daisukey256@gmail.com
 
 <size=1.5em><B>Assets and Licenses</B></size>
 
 AllSky Free - 10 Sky / Skybox Set
+ https://assetstore.unity.com/packages/2d/textures-materials/sky/allsky-free-10-sky-skybox-set-146014
  Standard Unity Asset Store EULA
 
 Legacy Particle Pack
+ https://assetstore.unity.com/packages/vfx/particles/legacy-particle-pack-73777
  Standard Unity Asset Store EULA
 
 Green Dungeon
+ https://assetstore.unity.com/packages/3d/environments/dungeons/green-dungeon-33935
  Standard Unity Asset Store EULA
 
 Level 1 Monster Pack
+ https://assetstore.unity.com/packages/3d/characters/creatures/level-1-monster-pack-77703
  Standard Unity Asset Store EULA
 
 Shooting Sound
+ https://assetstore.unity.com/packages/audio/sound-fx/shooting-sound-177096
  Standard Unity Asset Store EULA
 
 8Bit Music - 062022
+ https://assetstore.unity.com/packages/audio/music/8bit-music-062022-225623
  Standard Unity Asset Store EULA
 
-Post Processing
- Unity Companion License
+UI button pack 2 - 1200 button
+ https://assetstore.unity.com/packages/2d/gui/icons/ui-button-pack-2-1200-button-130422
+ Standard Unity Asset Store EULA
+
+SD Kohaku chanz
+ https://unity-chan.com/download/releaseNote.php?id=SDKohakuchanz
+ Unity-chan Licens 3.0 
+
+TheCogen-CityAllStars_Unity-chan_VoicePack_ActionGames_Vol.1
+ https://unity-chan.com/download/releaseNote.php?id=TheCogenCityAllStarsUnitychanVoicePackActionGamesVol1
+ Unity-chan Licens 3.0
+
+FancyCarouselView
+ https://github.com/Haruma-K/FancyCarouselView
+ MIT License
+
+FancyScrollView
+ https://github.com/setchi/FancyScrollView.git#upm
+ MIT License
 
 Unity Toon Shader
  Unity Companion License
 
-SD Kohaku chanz
- Unity-chan Licens 3.0 
+Post Processing
+ Unity Companion License
 
-TheCogen-CityAllStars_Unity-chan_VoicePack_ActionGames_Vol.1
- Unity-chan Licens 3.0
+TextMesh Pro
+ Unity Companion License
 
 Google Fonts
  SIL Open Font License
 
-UI button pack 2 - 1200 button
- Standard Unity Asset Store EULA
+Genjyuu Gothic Font
+ http://jikasei.me/font/genjyuu/
+ SIL Open Font License 1.1 
+
+
+<size=1.5em><B>Powerd by Unity2022</B></size>
 
