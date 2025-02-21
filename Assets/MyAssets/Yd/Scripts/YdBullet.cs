@@ -62,24 +62,67 @@ public class YdBullet : MonoBehaviour
     {
         // すでに衝突していたらなにもしない
         if (hasCollided) return;
-
         hasCollided = true;
 
-        // 敵に当たった場合は爆発エフェクト
-        if (other.tag == "YdEnemy")
+        // 弾の動きを止めて非表示
+        // （爆発エフェクトのためオブジェクトはまだ削除しない）
+        stopMovement();
+        hideBullet();
+        // 敵内部にとどまって連続ダメージを与えないように無効にする
+        disableDamage();
+
+        // 爆発対象に当たった場合は爆発エフェクトを再生
+        if (IsTriggered(other))
         {
-            StartCoroutine(playExplosion());
+            // 爆発エフェクト再生のコルーチンを呼び出す
+            StartCoroutine(playExplosionEffect());
         }
-        else 
+        else
         {
-            // 敵以外にあたった場合は即時消滅
+            // 爆発しない場合は即時消滅
             Destroy(gameObject);
         }
     }
 
 
+    // 弾の動きを止める
+    protected virtual void stopMovement()
+    {
+        // 移動と回転をリセット
+        Rigidbody rb = GetComponent<Rigidbody>();
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+    }
+
+
+    // 弾を隠す
+    protected virtual void hideBullet()
+    {
+        GetComponent<MeshRenderer>().enabled = false;
+    }
+
+
+    // 弾のダメージを無効化
+    protected virtual void disableDamage()
+    {
+        // 弾についているコライダーを無効化して
+        // 衝突判定でダメージを与えるのを止める
+        GetComponent<Collider>().enabled = false;
+    }
+
+
+    // 衝突して爆発する対象か否かを判定する
+    protected virtual bool IsTriggered(Collider other)
+    {
+        bool isTriggered = false;
+        if (other.tag == "YdEnemy") isTriggered = true;
+
+        return isTriggered;
+    }
+
+
     // 爆発処理のコルーチン
-    IEnumerator playExplosion()
+    IEnumerator playExplosionEffect()
     {
         // エフェクトを現在のオブジェクトの位置と回転で生成
         GameObject effectInstance = Instantiate(explosionEffectPrefab, transform.position, transform.rotation);
@@ -99,6 +142,7 @@ public class YdBullet : MonoBehaviour
         // 一定時間後にエフェクトを削除
         yield return new WaitForSeconds(effectDuration);
         Destroy(effectInstance);
+        // エフェクト再生が終ったら弾も削除
         Destroy(gameObject);
     }
 

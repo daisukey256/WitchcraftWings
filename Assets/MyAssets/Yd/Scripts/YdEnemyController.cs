@@ -18,7 +18,8 @@ public class YdEnemyController : MonoBehaviour
     // ------------------------------------
     // Privateフィールド変数
     // ------------------------------------
-    float initialPosX;  // 初期位置X座標
+    float initialPosX;          // 初期位置X座標
+    Collider lastHitCollider;   // 命中したした弾のコライダー 
 
 
     // ------------------------------------
@@ -55,20 +56,24 @@ public class YdEnemyController : MonoBehaviour
         }
     }
 
-
     // ------------------------------------
-    // 衝突・被弾処理
+    // 被弾処理
     // ------------------------------------
-    private void OnTriggerEnter(Collider other)
+    void ApplyDamage(Collider other)
     {
         //Debug.Log("OnTriggerEnter");
 
         // 弾に当たった
-        if(other.tag == "YdBullet")
+        // 　多重呼び出し防止で以前に当たった弾は処理しない
+        if (other.tag == "YdBullet" && other != lastHitCollider)
         {
+            lastHitCollider = other;
+
             // 敵のライフを減らす
             life--;
-            if(life < 0)
+
+            // ライフがなくなったら撃破
+            if (life <= 0)
             {
                 // スコアを加算
                 YdGameManager.TotalScore += scoreValue;
@@ -82,5 +87,26 @@ public class YdEnemyController : MonoBehaviour
             }
         }
     }
+
+    // ------------------------------------
+    // 衝突
+    // ------------------------------------
+    private void OnTriggerEnter(Collider other)
+    {
+        //Debug.Log("OnTriggerEnter");
+
+        // 弾に当たった
+        ApplyDamage(other);
+    }
+
+    // ------------------------------------
+    // 攻撃範囲内に取り込まれた場合
+    // ------------------------------------
+    private void OnTriggerStay(Collider other)
+    {
+        // 弾に当たった
+        ApplyDamage(other);
+    }
+
 
 }
